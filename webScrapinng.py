@@ -5,11 +5,11 @@ from datetime import datetime
 import pymysql
 import time
 # Abrimos uma conexão com o banco de dados:
-conexao = pymysql.connect(db='MercadoLivre', user='root', passwd='root')
+conexao = pymysql.connect(host='127.0.0.1',db='MercadoLivre', user='root', passwd='root', port=3306)
 # Cria um cursor:
 cursor = conexao.cursor()
 dataDaBusca = datetime.now()  
-
+dataString = str(dataDaBusca)
 def FormataPalavraParaBuscaTerabyte(entrada):
     saida = entrada.replace(" ", "+")
     return saida
@@ -24,7 +24,8 @@ def FormataPalavraParaBuscaMercadoLivre(entrada):
     busca = inicio + fim
     return busca
 
-def InserirProdutoDB(nome,precoProduto,recomendado,data):
+def InserirProdutoDB(nome,precoProduto,recomendado,data = dataString):
+    #insertProduto = f"INSERT INTO produtos(Nome,precoProduto,recomendado) VALUES({nome},{precoProduto},{recomendado});"
     insertProduto = f"INSERT INTO produtos(Nome,precoProduto,recomendado,dataInsert) VALUES({nome},{precoProduto},{recomendado},{data});"
     # Executa o comando:
     cursor.execute(insertProduto)
@@ -32,7 +33,6 @@ def InserirProdutoDB(nome,precoProduto,recomendado,data):
 def ConteudoTag(textoHtml):
     return re.search(">(.*)<", str(textoHtml)).group(1)
 
-dataDaBusca = convertTimestampToSQLDateTime(dataDaBusca)
 # Site que será coletado
 mercadoLivre = "https://lista.mercadolivre.com.br/"
 #site = "https://www.terabyteshop.com.br/"
@@ -84,7 +84,8 @@ for iten in itens:
         isMaisVendido = ConteudoTag(tagMaisVendido)
     else:
         isMaisVendido = ""
-    InserirProdutoDB(nome,preco,isMaisVendido,dataDaBusca)
+    InserirProdutoDB(nome,preco,isMaisVendido,dataString)
+    #InserirProdutoDB(nome,preco,isMaisVendido,dataDaBusca) 
 
 conexao.commit()
 # Finaliza a conexão
